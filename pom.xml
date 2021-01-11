@@ -15,6 +15,7 @@
         <module>mall_web</module>
         <module>mall_eureka</module>
         <module>mall_common</module>
+        <module>mall_common_db</module>
     </modules>
 
     <parent>

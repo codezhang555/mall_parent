@@ -12,12 +12,14 @@
         <module name="mall_eureka" />
         <module name="mall_service" />
         <module name="mall_service_api" />
+        <module name="mall_common_db" />
       </profile>
     </annotationProcessing>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="mall_common" options="-parameters" />
+      <module name="mall_common_db" options="-parameters" />
       <module name="mall_eureka" options="-parameters" />
       <module name="mall_gateway" options="-parameters" />
       <module name="mall_parent" options="-parameters" />
