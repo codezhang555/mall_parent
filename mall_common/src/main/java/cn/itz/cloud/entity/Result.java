@@ -1,69 +1,69 @@
 package cn.itz.cloud.entity;
 
+import java.io.Serializable;
+
 /**
- * 返回结果实体类
- * @PackageName: cn.itz.cloud.entity
- * @ClassName: Result
- * @Author: codeZhang
- * @DateTime: 2021/1/11 14:42
- * @Version 1.0
+ * 描述
+ *
+ * @author 返回结果类
+ * @version 1.0
+ * @package entity *
+ * @since 1.0
  */
-public class Result<T> {
+public class Result<T> implements Serializable {
+    private boolean flag;//是否成功
+    private Integer code;//返回码
+    private String message;//返回消息
+    private T data;//返回数据
 
-  private boolean flag;  //是否成功
-  private Integer code;  //返回码
-  private String message; //返回消息
+    public Result(boolean flag, Integer code, String message, Object data) {
+        this.flag = flag;
+        this.code = code;
+        this.message = message;
+        this.data = (T) data;
+    }
 
-  private T data; //返回数据
+    public Result(boolean flag, Integer code, String message) {
+        this.flag = flag;
+        this.code = code;
+        this.message = message;
+    }
 
-  public Result(boolean flag, Integer code, String message, T data) {
-    this.flag = flag;
-    this.code = code;
-    this.message = message;
-    this.data = data;
-  }
+    public Result() {
+        this.flag = true;
+        this.code = StatusCode.OK;
+        this.message = "操作成功!";
+    }
 
-  public Result(boolean flag, Integer code, String message) {
-    this.flag = flag;
-    this.code = code;
-    this.message = message;
-  }
+    public boolean isFlag() {
+        return flag;
+    }
 
-  public Result(){
-    this.flag = true;
-    this.code = StatusCode.OK;
-    this.message = "执行成功";
-  }
+    public void setFlag(boolean flag) {
+        this.flag = flag;
+    }
 
-  public boolean isFlag() {
-    return flag;
-  }
+    public Integer getCode() {
+        return code;
+    }
 
-  public void setFlag(boolean flag) {
-    this.flag = flag;
-  }
+    public void setCode(Integer code) {
+        this.code = code;
+    }
 
-  public Integer getCode() {
-    return code;
-  }
+    public String getMessage() {
+        return message;
+    }
 
-  public void setCode(Integer code) {
-    this.code = code;
-  }
+    public void setMessage(String message) {
+        this.message = message;
+    }
 
-  public String getMessage() {
-    return message;
-  }
+    public T getData() {
+        return data;
+    }
 
-  public void setMessage(String message) {
-    this.message = message;
-  }
-
-  public T getData() {
-    return data;
-  }
-
-  public void setData(T data) {
-    this.data = data;
-  }
+    public void setData(T data) {
+        this.data = data;
+    }
 }

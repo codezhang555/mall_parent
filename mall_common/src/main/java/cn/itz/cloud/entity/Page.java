@@ -3,258 +3,236 @@ package cn.itz.cloud.entity;
 import java.io.Serializable;
 import java.util.List;
 
-/**
- * 分页对象
- * @PackageName: cn.itz.cloud.entity
- * @ClassName: Page
- * @Author: codeZhang
- * @DateTime: 2021/1/11 15:48
- * @Version 1.0
- */
-public class Page<T> implements Serializable {
-  //当前默认为第一页
-  public static final Integer pageNum = 1;
-  //默认每页显示条件
-  public static final Integer pageSize = 20;
+public class Page <T> implements Serializable{
 
+	// 页数（第几页）
+	private long currentpage;
 
-  //判断当前页是否为空或是小于1
-  public static Integer cpn(Integer pageNum){
-    if(null == pageNum || pageNum < 1){
-      pageNum = 1;
-    }
-    return pageNum;
-  }
+	// 查询数据库里面对应的数据有多少条
+	private long total;// 从数据库查处的总记录数
 
+	// 每页查5条
+	private int size;
 
-  // 页数（第几页）
-  private long currentpage;
+	// 下页
+	private int next;
+	
+	private List<T> list;
 
-  // 查询数据库里面对应的数据有多少条
-  private long total;// 从数据库查处的总记录数
+	// 最后一页
+	private int last;
+	
+	private int lpage;//左边的开始的页码
+	
+	private int rpage;//右边额开始的页码
+	
+	//从哪条开始查
+	private long start;
+	
+	//全局偏移量
+	public int offsize = 2;
+	
+	public Page() {
+		super();
+	}
 
-  // 每页查5条
-  private int size;
+	/****
+	 *
+	 * @param currentpage
+	 * @param total
+	 * @param pagesize
+	 */
+	public void setCurrentpage(long currentpage,long total,long pagesize) {
+		//可以整除的情况下
+		long pagecount =  total/pagesize;
 
-  // 下页
-  private int next;
+		//如果整除表示正好分N页，如果不能整除在N页的基础上+1页
+		int totalPages = (int) (total%pagesize==0? total/pagesize : (total/pagesize)+1);
 
-  private List<T> list;
+		//总页数
+		this.last = totalPages;
 
-  // 最后一页
-  private int last;
+		//判断当前页是否越界,如果越界，我们就查最后一页
+		if(currentpage>totalPages){
+			this.currentpage = totalPages;
+		}else{
+			this.currentpage=currentpage;
+		}
 
-  private int lpage;
+		//计算start
+		this.start = (this.currentpage-1)*pagesize;
+	}
 
-  private int rpage;
+	//上一页
+	public long getUpper() {
+		return currentpage>1? currentpage-1: currentpage;
+	}
 
-  //从哪条开始查
-  private long start;
+	//总共有多少页，即末页
+	public void setLast(int last) {
+		this.last = (int) (total%size==0? total/size : (total/size)+1);
+	}
 
-  //全局偏移量
-  public int offsize = 2;
+	/****
+	 * 带有偏移量设置的分页
+	 * @param total
+	 * @param currentpage
+	 * @param pagesize
+	 * @param offsize
+	 */
+	public Page(long total,int currentpage,int pagesize,int offsize) {
+		this.offsize = offsize;
+		initPage(total, currentpage, pagesize);
+	}
 
-  public Page() {
-    super();
-  }
+	/****
+	 *
+	 * @param total   总记录数
+	 * @param currentpage	当前页
+	 * @param pagesize	每页显示多少条
+	 */
+	public Page(long total,int currentpage,int pagesize) {
+		initPage(total,currentpage,pagesize);
+	}
 
-  /****
-   *
-   * @param currentpage
-   * @param total
-   * @param pagesize
-   */
-  public void setCurrentpage(long currentpage,long total,long pagesize) {
-    //可以整除的情况下
-    long pagecount =  total/pagesize;
+	/****
+	 * 初始化分页
+	 * @param total
+	 * @param currentpage
+	 * @param pagesize
+	 */
+	public void initPage(long total,int currentpage,int pagesize){
+		//总记录数
+		this.total = total;
+		//每页显示多少条
+		this.size=pagesize;
 
-    //如果整除表示正好分N页，如果不能整除在N页的基础上+1页
-    int totalPages = (int) (total%pagesize==0? total/pagesize : (total/pagesize)+1);
+		//计算当前页和数据库查询起始值以及总页数
+		setCurrentpage(currentpage, total, pagesize);
 
-    //总页数
-    this.last = totalPages;
+		//分页计算
+		int leftcount =this.offsize,	//需要向上一页执行多少次
+				rightcount =this.offsize;
 
-    //判断当前页是否越界,如果越界，我们就查最后一页
-    if(currentpage>totalPages){
-      this.currentpage = totalPages;
-    }else{
-      this.currentpage=currentpage;
-    }
+		//起点页
+		this.lpage =currentpage;
+		//结束页
+		this.rpage =currentpage;
 
-    //计算start
-    this.start = (this.currentpage-1)*pagesize;
-  }
+		//2点判断
+		this.lpage = currentpage-leftcount;			//正常情况下的起点
+		this.rpage = currentpage+rightcount;		//正常情况下的终点
 
-  //上一页
-  public long getUpper() {
-    return currentpage>1? currentpage-1: currentpage;
-  }
+		//页差=总页数和结束页的差
+		int topdiv = this.last-rpage;				//判断是否大于最大页数
 
-  //总共有多少页，即末页
-  public void setLast(int last) {
-    this.last = (int) (total%size==0? total/size : (total/size)+1);
-  }
+		/***
+		 * 起点页
+		 * 1、页差<0  起点页=起点页+页差值
+		 * 2、页差>=0 起点和终点判断
+		 */
+		this.lpage=topdiv<0? this.lpage+topdiv:this.lpage;
 
-  /****
-   * 带有偏移量设置的分页
-   * @param total
-   * @param currentpage
-   * @param pagesize
-   * @param offsize
-   */
-  public Page(long total,int currentpage,int pagesize,int offsize) {
-    this.offsize = offsize;
-    initPage(total, currentpage, pagesize);
-  }
+		/***
+		 * 结束页
+		 * 1、起点页<=0   结束页=|起点页|+1
+		 * 2、起点页>0    结束页
+		 */
+		this.rpage=this.lpage<=0? this.rpage+(this.lpage*-1)+1: this.rpage;
 
-  /****
-   *
-   * @param total   总记录数
-   * @param currentpage	当前页
-   * @param pagesize	每页显示多少条
-   */
-  public Page(long total,int currentpage,int pagesize) {
-    initPage(total,currentpage,pagesize);
-  }
+		/***
+		 * 当起点页<=0  让起点页为第一页
+		 * 否则不管
+		 */
+		this.lpage=this.lpage<=0? 1:this.lpage;
 
-  /****
-   * 初始化分页
-   * @param total
-   * @param currentpage
-   * @param pagesize
-   */
-  public void initPage(long total,int currentpage,int pagesize){
-    //总记录数
-    this.total = total;
-    //每页显示多少条
-    this.size=pagesize;
+		/***
+		 * 如果结束页>总页数   结束页=总页数
+		 * 否则不管
+		 */
+		this.rpage=this.rpage>last? this.last:this.rpage;
+	}
 
-    //计算当前页和数据库查询起始值以及总页数
-    setCurrentpage(currentpage, total, pagesize);
+	public long getNext() {
+		return  currentpage<last? currentpage+1: last;
+	}
 
-    //分页计算
-    int leftcount =this.offsize,	//需要向上一页执行多少次
-        rightcount =this.offsize;
+	public void setNext(int next) {
+		this.next = next;
+	}
 
-    //起点页
-    this.lpage =currentpage;
-    //结束页
-    this.rpage =currentpage;
+	public long getCurrentpage() {
+		return currentpage;
+	}
 
-    //2点判断
-    this.lpage = currentpage-leftcount;			//正常情况下的起点
-    this.rpage = currentpage+rightcount;		//正常情况下的终点
+	public long getTotal() {
+		return total;
+	}
 
-    //页差=总页数和结束页的差
-    int topdiv = this.last-rpage;				//判断是否大于最大页数
+	public void setTotal(long total) {
+		this.total = total;
+	}
 
-    /***
-     * 起点页
-     * 1、页差<0  起点页=起点页+页差值
-     * 2、页差>=0 起点和终点判断
-     */
-    this.lpage=topdiv<0? this.lpage+topdiv:this.lpage;
+	public long getSize() {
+		return size;
+	}
 
-    /***
-     * 结束页
-     * 1、起点页<=0   结束页=|起点页|+1
-     * 2、起点页>0    结束页
-     */
-    this.rpage=this.lpage<=0? this.rpage+(this.lpage*-1)+1: this.rpage;
+	public void setSize(int size) {
+		this.size = size;
+	}
 
-    /***
-     * 当起点页<=0  让起点页为第一页
-     * 否则不管
-     */
-    this.lpage=this.lpage<=0? 1:this.lpage;
+	public long getLast() {
+		return last;
+	}
 
-    /***
-     * 如果结束页>总页数   结束页=总页数
-     * 否则不管
-     */
-    this.rpage=this.rpage>last? this.last:this.rpage;
-  }
+	public long getLpage() {
+		return lpage;
+	}
 
-  public long getNext() {
-    return  currentpage<last? currentpage+1: last;
-  }
+	public void setLpage(int lpage) {
+		this.lpage = lpage;
+	}
 
-  public void setNext(int next) {
-    this.next = next;
-  }
+	public long getRpage() {
+		return rpage;
+	}
 
-  public long getCurrentpage() {
-    return currentpage;
-  }
+	public void setRpage(int rpage) {
+		this.rpage = rpage;
+	}
 
-  public long getTotal() {
-    return total;
-  }
+	public long getStart() {
+		return start;
+	}
 
-  public void setTotal(long total) {
-    this.total = total;
-  }
+	public void setStart(long start) {
+		this.start = start;
+	}
 
-  public long getSize() {
-    return size;
-  }
+	public void setCurrentpage(long currentpage) {
+		this.currentpage = currentpage;
+	}
 
-  public void setSize(int size) {
-    this.size = size;
-  }
+	/**
+	 * @return the list
+	 */
+	public List<T> getList() {
+		return list;
+	}
 
-  public long getLast() {
-    return last;
-  }
+	/**
+	 * @param list the list to set
+	 */
+	public void setList(List<T> list) {
+		this.list = list;
+	}
 
-  public long getLpage() {
-    return lpage;
-  }
-
-  public void setLpage(int lpage) {
-    this.lpage = lpage;
-  }
-
-  public long getRpage() {
-    return rpage;
-  }
-
-  public void setRpage(int rpage) {
-    this.rpage = rpage;
-  }
-
-  public long getStart() {
-    return start;
-  }
-
-  public void setStart(long start) {
-    this.start = start;
-  }
-
-  public void setCurrentpage(long currentpage) {
-    this.currentpage = currentpage;
-  }
-
-  /**
-   * @return the list
-   */
-  public List<T> getList() {
-    return list;
-  }
-
-  /**
-   * @param list the list to set
-   */
-  public void setList(List<T> list) {
-    this.list = list;
-  }
-
-  public static void main(String[] args) {
-    //总记录数
-    //当前页
-    //每页显示多少条
-    int cpage =17;
-    Page page = new Page(1001,cpage,50,7);
-    System.out.println("开始页:"+page.getLpage()+"__当前页："+page.getCurrentpage()+"__结束页"+page.getRpage()+"____总页数："+page.getLast());
-  }
+	public static void main(String[] args) {
+			//总记录数
+			//当前页
+			//每页显示多少条
+			int cpage =17;
+			Page page = new Page(1001,cpage,50,7);
+			System.out.println("开始页:"+page.getLpage()+"__当前页："+page.getCurrentpage()+"__结束页"+page.getRpage()+"____总页数："+page.getLast());
+	}
 }
