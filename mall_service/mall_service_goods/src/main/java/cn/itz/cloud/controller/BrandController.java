@@ -49,6 +49,11 @@ public class BrandController {
         return new Result<>(true,StatusCode.OK,"根据id查询品牌成功！",brand);
     }
 
+    /**
+     * 增加品牌
+     * @param brand
+     * @return
+     */
     @PostMapping(value = "/addBrand")
     public Result addBrand(@RequestBody Brand brand){
         brandService.addBrand(brand);
