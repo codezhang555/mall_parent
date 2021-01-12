@@ -129,6 +129,38 @@ public class FastDFSUtils {
   }
 
   /**
+   * 根据文件组名和文件存储路径获取Storage服务的ip、端口信息
+   * @param groupName  组名
+   * @param remoteFileName  文件完整存储名
+   * @return
+   */
+  public static ServerInfo[] getServerInfo(String groupName,String remoteFileName){
+    try {
+      TrackerClient trackerClient = new TrackerClient();
+      TrackerServer trackerServer = trackerClient.getConnection();
+      return trackerClient.getFetchStorages(trackerServer,groupName,remoteFileName);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
+
+  /**
+   * 获取Tracker服务地址
+   * @return
+   */
+  public static String getTrackerUrl(){
+    try {
+      TrackerClient trackerClient = new TrackerClient();
+      TrackerServer trackerServer = trackerClient.getConnection();
+      return "http://" + trackerServer.getInetSocketAddress().getHostString()+":"+ClientGlobal.getG_tracker_http_port();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
+
+  /**
    * 获取TrackerServer
    * @return
    */

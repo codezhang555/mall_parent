@@ -28,7 +28,7 @@ public class FastDFSTest {
       //获取StorageClient对象
       StorageClient storageClient = new StorageClient(trackerServer, null);
       //执行文件上传
-      String[] jpgs = storageClient.upload_file("C:\\Users\\Administrator\\Desktop\\3.jpg", "jpg", null);
+      String[] jpgs = storageClient.upload_file("C:\\Users\\72991\\Desktop\\1.jpg", "jpg", null);
 
       for (String jpg : jpgs) {
         System.out.println(jpg);
