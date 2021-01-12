@@ -4,6 +4,7 @@ import cn.itz.cloud.entity.Result;
 import cn.itz.cloud.entity.StatusCode;
 import cn.itz.cloud.pojo.Brand;
 import cn.itz.cloud.service.BrandService;
+import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +28,43 @@ public class BrandController {
 
     @Autowired
     private BrandService brandService;
+
+    /**
+     * 分页+多条件查询
+     * @param brand
+     * @param page 当前页
+     * @param size 每页多少条数据
+     * @return
+     */
+    @PostMapping(value = "/search/{page}/{size}")
+    public Result<PageInfo> findBrandPage(@RequestBody(required = false) Brand brand,@PathVariable int page,@PathVariable int size){
+        //执行搜索
+        PageInfo<Brand> pageInfo = brandService.findPage(brand, page, size);
+        return new Result<>(true,StatusCode.OK,"查询成功！",pageInfo);
+    }
+
+    /**
+     * 分页查询
+     * @param page 当前页
+     * @param size 每页显示多少条
+     * @return
+     */
+    @GetMapping(value = "/search/{page}/{size}")
+    public Result<PageInfo> findPage(@PathVariable int page,@PathVariable int size){
+        PageInfo<Brand> pageInfo = brandService.findPage(page, size);
+        return new Result<>(true,StatusCode.OK,"查询成功！",pageInfo);
+    }
+
+    /**
+     * 多条件搜索品牌数据
+     * @param brand
+     * @return
+     */
+    @PostMapping(value = "/search")
+    public Result<List<Brand>> findList(@RequestBody(required = false) Brand brand){
+        List<Brand> list = brandService.findBrandList(brand);
+        return new Result<>(true,StatusCode.OK,"查询成功！",list);
+    }
 
     /**
      * 查询所有品牌
@@ -58,5 +96,29 @@ public class BrandController {
     public Result addBrand(@RequestBody Brand brand){
         brandService.addBrand(brand);
         return new Result(true,StatusCode.OK,"添加成功！");
+    }
+
+    /**
+     * 修改品牌信息
+     * @param brand
+     * @param id
+     * @return
+     */
+    @PutMapping(value = "/updateBrand/{id}")
+    public Result updateBrand(@RequestBody Brand brand,@PathVariable Integer id){
+        brand.setId(id);
+        brandService.updateBrand(brand);
+        return new Result(true,StatusCode.OK,"修改成功！");
+    }
+
+    /**
+     * 根据id删除品牌
+     * @param id
+     * @return
+     */
+    @DeleteMapping("/deleteBrandById/{id}")
+    public Result deleteBrandById(@PathVariable Integer id){
+        brandService.deleteBrand(id);
+        return new Result(true,StatusCode.OK,"删除成功！");
     }
 }
