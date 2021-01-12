@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="ProjectModuleManager">
-    <modules>
-      <module fileurl="file://$PROJECT_DIR$/mall_service/mall_service_goods/mall_service_goods.iml" filepath="$PROJECT_DIR$/mall_service/mall_service_goods/mall_service_goods.iml" />
-      <module fileurl="file://$PROJECT_DIR$/mall_service_api/mall_service_goods_api/mall_service_goods_api.iml" filepath="$PROJECT_DIR$/mall_service_api/mall_service_goods_api/mall_service_goods_api.iml" />
-    </modules>
-  </component>
-</project>
